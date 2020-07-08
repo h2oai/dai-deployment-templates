@@ -19,6 +19,11 @@ buildscript {
     }
 }
 
+allprojects {
+    // Needs explicit conversion from GString to Java String (since some plugins do not expect GString)
+    version = "${swaggerApiVersion}.${minorVersion}.${patchVersion}" as String
+}
+
 subprojects {
     repositories {
         mavenCentral()

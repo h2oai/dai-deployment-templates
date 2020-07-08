@@ -1,0 +1,79 @@
+import java.security.DigestInputStream
+import java.security.MessageDigest
+
+apply plugin: 'base'
+
+ext {
+    swaggerApiFile = file("swagger.yaml")
+}
+
+artifacts {
+    archives swaggerApiFile
+}
+
+task verifySwaggerApiHash {
+    group "Swagger Api"
+    description "Verify that the swagger file was not modify without proper setup of build."
+    inputs.files(swaggerApiFile)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def actHash = generateMD5(swaggerApiFile, swaggerApiVersion.getBytes())
+        def expHash = swaggerApiHash
+        if (!version.startsWith(swaggerApiVersion)) {
+            throw new GradleException("""
+            |The version of Swagger API (`swaggerApiVersion=${swaggerApiVersion}`) does not
+            |match version of the project (`version=${version}`)!
+            |
+            |Make sure:
+            | - the value of `swaggerApiVersion` matches major and minor components 
+            |   of `version`.
+            |""".stripMargin())
+        }
+
+        if (!actHash.equals(expHash)) {
+            throw new GradleException("""
+            |It looks like that Swagger API was modified but the version of API was not updated, 
+            |because the hash of `${swaggerApiFile}` (${actHash}) is different 
+            |from hash defined in `gradle.properties` (${expHash})!
+            |
+            |You need to:
+            | (1) update property `swaggerApiVersion` in `gradle.properties`:
+            |     - if the change of API is minor then update minor part of version.
+            |     - if you change version of API then update major part of version.
+            | (2) run `./gradlew generateSwaggerApiHash` to get new hash and
+            |     update the `swaggerApiHash` variable in `gradle.properties`.
+            |""".stripMargin())
+
+        }
+
+    }
+}
+
+check.dependsOn verifySwaggerApiHash
+
+task generateSwaggerApiHash {
+    group "Swagger Api"
+    description "Generate a new hash for swagger file."
+
+    doLast {
+        def hash = generateMD5(swaggerApiFile, swaggerApiVersion.getBytes())
+        print("""--- Copy to gradle.properties ---
+        |swaggerApiVersion = ${swaggerApiVersion}
+        |swaggerApiHash = ${hash}
+        |------------
+        | NOTE: Do not forget to bump minorVersion for the Swagger change!
+        |""".stripMargin())
+    }
+}
+
+def generateMD5(File file, byte[] salt = null) {
+    def digest = java.security.MessageDigest.getInstance("MD5")
+    if (salt != null) digest.update(salt)
+    file.withInputStream { is ->
+        is.eachByte 4096, { buf, len ->
+            digest.update(buf, 0, len)
+        }
+    }
+    digest.digest().encodeHex() as String
+}

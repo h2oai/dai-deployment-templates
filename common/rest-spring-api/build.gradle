@@ -7,12 +7,14 @@ apply from: project(":").file('gradle/java.gradle')
 dependencies {
     implementation group: 'io.swagger', name: 'swagger-annotations'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    
+    swaggerCodegen project(path: ':common:swagger', configuration: 'archives')
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
 }
 
 swaggerSources {
     api {
-        inputFile = file('../swagger/swagger.yaml')
+        inputFile = project(":common:swagger").file('swagger.yaml')
         code {
             language = 'spring'
             configFile = file('../swagger/swagger_codegen.json')
