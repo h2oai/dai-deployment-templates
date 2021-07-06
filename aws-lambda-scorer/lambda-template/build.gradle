@@ -20,7 +20,7 @@ test {
     useJUnitPlatform()
 }
 
-// Build an the AWS lambda distribution zip file.
+// Build the AWS lambda distribution zip file.
 task buildZip(type: Zip) {
     archiveName "${project.name}.zip"
     from compileJava
