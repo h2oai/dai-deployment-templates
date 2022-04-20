@@ -1,0 +1,4 @@
+pandas
+datatable
+flask-restful
+https://s3.amazonaws.com/artifacts.h2o.ai/releases/ai/h2o/daimojo/2.7.8%2Bmaster.431/x86_64-centos7/daimojo-2.7.8%2Bmaster.431-cp38-cp38-linux_x86_64.whl
