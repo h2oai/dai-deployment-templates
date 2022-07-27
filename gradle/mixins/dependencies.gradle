@@ -50,6 +50,7 @@ dependencyManagement {
         dependency group: 'ai.h2o', name: 'sparkling-water-scoring_2.12', version: sparklingWaterVersion
         dependency group: 'com.typesafe', name:'config', version: configVersion
         dependency group: 'uk.org.webcompere', name: 'system-stubs-jupiter', version: jupiterSystemStubsVersion
-
+        dependency group: 'com.squareup.okhttp', name: 'okhttp', version: okhttpVersion
+        dependency group: 'com.squareup.okhttp', name: 'logging-interceptor', version: okhttpVersion
     }
 }

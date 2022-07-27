@@ -5,10 +5,6 @@ dependencies {
     implementation project(':common:transform')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    constraints {
-        // because https://app.snyk.io/vuln/SNYK-JAVA-COMMONSBEANUTILS-460111
-        compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-    }
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-core'
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-events'
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3'

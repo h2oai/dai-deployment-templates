@@ -5,7 +5,10 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation group: 'io.swagger', name: 'swagger-annotations'
+    implementation group: 'com.squareup.okhttp', name: 'okhttp'
+    implementation group: 'com.squareup.okhttp', name: 'logging-interceptor'
+    implementation group: 'com.google.code.gson', name: 'gson'
+    implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     swaggerCodegen group: 'io.swagger.codegen.v3', name: 'swagger-codegen-cli'
@@ -21,6 +24,15 @@ swaggerSources {
             dependsOn validation
         }
     }
+    apiV1Exp {
+        inputFile = file("../swagger/v1exp/swagger.yaml")
+        code {
+            language = 'spring'
+            configFile = file('../swagger/v1exp/swagger_codegen.json')
+            components = ['models': true, 'apis': true]
+            dependsOn validation
+        }
+    }
 }
 
 jar {
@@ -32,5 +44,16 @@ bootJar {
     enabled=false
 }
 
-compileJava.dependsOn swaggerSources.api.code
-sourceSets.main.java.srcDir "${swaggerSources.api.code.outputDir}/src/main/java"
+sourceSets {
+    main {
+        java {
+            srcDirs "${swaggerSources.api.code.outputDir}/src/main/java"
+            srcDirs "${swaggerSources.apiV1Exp.code.outputDir}/src/main/java"
+        }
+    }
+}
+
+compileJava {
+    dependsOn swaggerSources.api.code
+    dependsOn swaggerSources.apiV1Exp.code
+}

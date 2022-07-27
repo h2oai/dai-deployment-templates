@@ -7,10 +7,6 @@ dependencies {
     implementation project(':common:kdb-java')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    constraints {
-        // because https://app.snyk.io/vuln/SNYK-JAVA-COMMONSBEANUTILS-460111
-        compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-    }
     implementation group: 'commons-cli', name: 'commons-cli'
     implementation group: 'org.slf4j', name: 'slf4j-api'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api'

@@ -9,10 +9,6 @@ dependencies {
     implementation project(':common:rest-jdbc-spring-api')
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    constraints {
-        // because https://app.snyk.io/vuln/SNYK-JAVA-COMMONSBEANUTILS-460111
-        compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-    }
     implementation group: 'ai.h2o', name: 'sparkling-water-scoring_2.12'
     implementation group: 'org.scala-lang', name: 'scala-library'
     implementation group: 'org.apache.spark', name: 'spark-core_2.12'

@@ -12,10 +12,6 @@ dependencies {
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-h2o3-impl'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
-    constraints {
-        // because https://app.snyk.io/vuln/SNYK-JAVA-COMMONSBEANUTILS-460111
-        compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-    }
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: springFoxVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.63'
