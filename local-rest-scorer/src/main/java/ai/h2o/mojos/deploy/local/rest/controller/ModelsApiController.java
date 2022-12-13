@@ -1,5 +1,7 @@
 package ai.h2o.mojos.deploy.local.rest.controller;
 
+import ai.h2o.mojos.deploy.common.exceptions.ScoringException;
+import ai.h2o.mojos.deploy.common.exceptions.ScoringShapleyException;
 import ai.h2o.mojos.deploy.common.rest.api.ModelApi;
 import ai.h2o.mojos.deploy.common.rest.model.CapabilityType;
 import ai.h2o.mojos.deploy.common.rest.model.ContributionRequest;
@@ -18,7 +20,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -72,29 +73,28 @@ public class ModelsApiController implements ModelApi {
       ScoreResponse scoreResponse = scorer.score(request);
       return ResponseEntity.ok(scoreResponse);
     } catch (Exception e) {
-      log.info("Failed scoring request: {}, due to: {}", request, e.getMessage());
-      log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      String message = String.format(
+          "Failed scoring request: %s, due to: %s", request, e.getMessage());
+      throw new ScoringException(message, e);
     }
   }
 
   @Override
   public ResponseEntity<ScoreResponse> getScoreByFile(String file) {
     if (Strings.isNullOrEmpty(file)) {
-      log.info("Request is missing a valid CSV file path");
-      return ResponseEntity.badRequest().build();
+      throw new ScoringException("Request is missing a valid CSV file path");
     }
     try {
       log.info("Got scoring request for CSV");
       return ResponseEntity.ok(scorer.scoreCsv(file));
     } catch (IOException e) {
-      log.info("Failed loading CSV file: {}, due to: {}", file, e.getMessage());
-      log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      String message = String.format(
+          "Failed loading CSV file: %s, due to: %s", file, e.getMessage());
+      throw new ScoringException(message, e);
     } catch (Exception e) {
-      log.info("Failed scoring CSV file: {}, due to: {}", file, e.getMessage());
-      log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      String message = String.format(
+          "Failed scoring CSV file: %s, due to: %s", file, e.getMessage());
+      throw new ScoringException(message, e);
     }
   }
 
@@ -106,13 +106,15 @@ public class ModelsApiController implements ModelApi {
       ContributionResponse contributionResponse
               = scorer.computeContribution(request);
       return ResponseEntity.ok(contributionResponse);
-    } catch (UnsupportedOperationException e) {
-      log.info("Unsupported operation due to: {}", e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    } catch (IllegalArgumentException e) {
+      String message = String.format("Unsupported operation due to: %s", e.getMessage());
+      throw new ScoringShapleyException(message, e);
     } catch (Exception e) {
-      log.info("Failed shapley contribution request due to: {}", e.getMessage());
-      log.debug(" - failure cause: ", e);
-      return ResponseEntity.badRequest().build();
+      String message = String.format(
+          "Failed shapley contribution request: %s, due to: %s",
+          request,
+          e.getMessage());
+      throw new ScoringShapleyException(message, e);
     }
   }
 

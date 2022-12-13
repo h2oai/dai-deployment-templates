@@ -133,6 +133,7 @@ public class MojoScorer {
     } catch (Exception e) {
       log.info("Failed shapley contribution due to: {}", e.getMessage());
       log.debug(" - failure cause: ", e);
+      return response;
     }
     return response;
   }

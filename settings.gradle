@@ -1,6 +1,7 @@
 rootProject.name = 'dai-deployment-templates'
 include 'aws-lambda-scorer:lambda-template'
 include 'aws-lambda-scorer:terraform-recipe'
+include 'common:exceptions'
 include 'common:jdbc'
 include 'common:rest-java-model'
 include 'common:rest-jdbc-spring-api'

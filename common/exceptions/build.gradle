@@ -1,0 +1,9 @@
+apply from: project(":").file('gradle/java.gradle')
+
+dependencies {
+    implementation group: 'org.slf4j', name: 'slf4j-api'
+}
+
+test {
+    useJUnitPlatform()
+}
