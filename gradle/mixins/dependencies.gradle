@@ -12,6 +12,7 @@ dependencyManagement {
             entry 'mojo2-runtime-api'
             entry 'mojo2-runtime-h2o3-impl'
             entry 'mojo2-runtime-impl'
+            entry 'mojo2-runtime'
         }
         dependency group: 'com.amazonaws', name: 'aws-lambda-java-core', version: awsLambdaCoreVersion
         dependency group: 'com.amazonaws', name: 'aws-lambda-java-events', version: awsLambdaEventsVersion
