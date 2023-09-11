@@ -17,6 +17,8 @@ dependencies {
     implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.63'
 
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
+    implementation group: 'ch.qos.logback.contrib', name: 'logback-json-classic', version: logbackJsonVersion
+    runtimeOnly group: 'ch.qos.logback.contrib', name: 'logback-jackson', version: logbackJsonVersion
 
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.google.truth.extensions', name: 'truth-java8-extension'
