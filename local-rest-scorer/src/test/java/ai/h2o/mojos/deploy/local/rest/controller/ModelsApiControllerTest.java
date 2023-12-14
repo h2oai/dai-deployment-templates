@@ -18,11 +18,13 @@ import ai.h2o.mojos.deploy.common.transform.ShapleyLoadOption;
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
 import ai.h2o.mojos.runtime.api.PipelineConfig;
+import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -56,6 +58,7 @@ class ModelsApiControllerTest {
     theMock.when(() -> MojoPipelineService
         .loadPipeline(Mockito.eq(new File(tmpModel.getAbsolutePath())), any(PipelineConfig.class)))
       .thenReturn(mojoPipeline);
+    when(mojoPipeline.getOutputMeta()).thenReturn(new MojoFrameMeta(Collections.emptyList()));
   }
 
   @Test
