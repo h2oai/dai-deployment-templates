@@ -6,6 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ScorerApplication {
   public static void main(String[] args) {
-    new SpringApplication(ScorerApplication.class).run(args);
+    SpringApplication.run(ScorerApplication.class, args);
   }
 }

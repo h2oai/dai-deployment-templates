@@ -5,5 +5,5 @@
 apply plugin: 'java'
 apply from: project(":").file('gradle/mixins/dependencies.gradle')
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = "21"
+targetCompatibility = "21"

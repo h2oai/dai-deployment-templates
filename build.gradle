@@ -47,8 +47,8 @@ subprojects {
 // }
 //
 task distributionZip(type: Zip) {
-    archiveName "${project.name}-${project.version}.zip"
-    destinationDir(file(buildDir))
+    getArchiveFileName().set("${project.name}-${project.version}.zip")
+    getDestinationDirectory().set(file(buildDir))
 }
 
 task printVersion {

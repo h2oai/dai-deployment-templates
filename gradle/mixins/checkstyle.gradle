@@ -1,5 +1,4 @@
 // Defines shared Gradle project Checkstyle analyzer configuration.
-
 apply plugin: 'checkstyle'
 
 checkstyle {

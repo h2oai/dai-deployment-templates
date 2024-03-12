@@ -474,8 +474,8 @@ class MojoScorerTest {
 
   private ScoreResponse generateDummyResponse() {
     ScoreResponse response = new ScoreResponse();
-    List<List<String>> outputRows =
-        Stream.generate(ArrayList<String>::new).limit(4).collect(Collectors.toList());
+    List<Row> outputRows =
+        Stream.generate(Row::new).limit(4).collect(Collectors.toList());
     response.setScore(outputRows);
     response.setFields(Arrays.asList("field1"));
     return response;

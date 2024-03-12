@@ -84,6 +84,7 @@ public class ModelsApiController implements ModelApi {
     try {
       log.info("Got scoring request");
       ScoreResponse scoreResponse = scorer.score(request);
+      log.info("finish scoring request");
       scoreResponse.id(getScorerModelId());
       return ResponseEntity.ok(scoreResponse);
     } catch (IllegalArgumentException e) {

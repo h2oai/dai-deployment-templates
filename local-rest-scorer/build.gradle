@@ -5,7 +5,6 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    runtimeOnly    group: 'org.springframework.boot', name: 'spring-boot-properties-migrator'
     implementation project(':common:rest-spring-api')
     implementation project(':common:transform')
     implementation group: 'ai.h2o', name: 'h2o-genmodel'

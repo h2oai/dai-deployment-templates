@@ -19,8 +19,8 @@ public class MojoFrameToContributionResponseConverter {
    * ContributionResponse}.
    */
   public ContributionResponse contributionResponseWithNoOutputGroup(MojoFrame shapleyMojoFrame) {
-    List<List<String>> outputRows =
-        Stream.generate(ArrayList<String>::new)
+    List<Row> outputRows =
+        Stream.generate(Row::new)
             .limit(shapleyMojoFrame.getNrows())
             .collect(Collectors.toList());
     Utils.copyResultFields(shapleyMojoFrame, outputRows);

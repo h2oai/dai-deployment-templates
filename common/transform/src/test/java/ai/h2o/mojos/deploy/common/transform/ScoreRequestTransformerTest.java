@@ -38,16 +38,16 @@ public class ScoreRequestTransformerTest {
     // Given
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(Collections.singletonList("test"));
-    List<List<String>> rows =
+    List<Row> rows =
         new ArrayList<>(
             Arrays.asList(
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>()));
+                new Row(),
+                new Row(),
+                new Row(),
+                new Row(),
+                new Row(),
+                new Row(),
+                new Row()));
     rows.get(0).addAll(Collections.singletonList("true"));
     rows.get(1).addAll(Collections.singletonList("False"));
     rows.get(2).addAll(Collections.singletonList("TrUE"));
@@ -85,7 +85,7 @@ public class ScoreRequestTransformerTest {
     // Given
     ScoreRequest scoreRequest = new ScoreRequest();
     scoreRequest.setFields(Collections.singletonList("test"));
-    List<List<String>> rows = new ArrayList<>(Arrays.asList(new Row(), new Row()));
+    List<Row> rows = new ArrayList<>(Arrays.asList(new Row(), new Row()));
     rows.get(0).addAll(Collections.singletonList("unchangedFeature1"));
     rows.get(1).addAll(Collections.singletonList("unchangedFeature2"));
     scoreRequest.setRows(rows);

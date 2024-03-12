@@ -2,11 +2,14 @@ package ai.h2o.mojos.deploy.common.transform;
 
 import static java.util.Arrays.asList;
 
+import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoFrameMeta;
 import java.util.List;
 
-/** Checks that the request is of the correct form matching the corresponding mojo pipeline. */
+/**
+ * Checks that the request is of the correct form matching the corresponding mojo pipeline.
+ */
 public class RequestChecker {
   private final SampleRequestBuilder sampleRequestBuilder;
 
@@ -36,7 +39,7 @@ public class RequestChecker {
     if (fields == null || fields.isEmpty()) {
       return "List of input fields cannot be empty";
     }
-    List<List<String>> rows = scoreRequest.getRows();
+    List<Row> rows = scoreRequest.getRows();
     if (rows == null || rows.isEmpty()) {
       return "List of input data rows cannot be empty";
     }
@@ -44,7 +47,7 @@ public class RequestChecker {
     if (!fields.containsAll(expectedFields)) {
       return String.format(
           "Input fields don't contain all the Mojo fields, expected %s actual %s",
-          expectedFields.toString(), fields.toString());
+          expectedFields, fields);
     }
     int i = 0;
     for (List<String> row : scoreRequest.getRows()) {

@@ -5,7 +5,7 @@ plugins {
 apply from: project(":").file('gradle/java.gradle')
 
 dependencies {
-    implementation project(':common:rest-java-model')
+    implementation project(':common:rest-spring-api')
     implementation group: 'io.swagger.core.v3', name: 'swagger-annotations'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-api'
     implementation group: 'ai.h2o', name: 'mojo2-runtime-impl'
@@ -29,7 +29,11 @@ dependencies {
 }
 
 bootJar {
-    enabled=false
+    enabled = false
+}
+
+jar {
+    enabled = true
 }
 
 test {

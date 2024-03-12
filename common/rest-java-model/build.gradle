@@ -23,6 +23,7 @@ openApiGenerate {
     invokerPackage = "ai.h2o.mojos.deploy.common.rest"
     inputSpec = "$rootDir/common/swagger/v1openapi3/swagger.json"
     outputDir = "$buildDir/gen"
+    generateAliasAsModel = true
     globalProperties.set([
             "skipFormModel": "false",
     ])
@@ -31,6 +32,7 @@ openApiGenerate {
             "interfaceOnly": "true",
             "basePackage": "ai.h2o.mojos.deploy.common.rest",
             "modelPackage": "ai.h2o.mojos.deploy.common.rest.model",
+            "apiPackage": "ai.h2o.mojos.deploy.common.rest.api",
     ])
 }
 
@@ -38,11 +40,15 @@ bootJar {
     enabled=false
 }
 
+jar {
+    enabled=true
+}
+
 compileJava.dependsOn tasks.openApiValidate, tasks.openApiGenerate
 sourceSets {
     main {
         java {
-            srcDir("$buildDir/gen/src/main/java")
+            srcDir("${buildDir}/gen/src/main/java")
         }
     }
 }

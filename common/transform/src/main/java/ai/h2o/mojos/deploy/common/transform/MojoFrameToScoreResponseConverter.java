@@ -37,7 +37,7 @@ public class MojoFrameToScoreResponseConverter
   // Note: assumption is that pipeline supports Prediction interval.
   // However for some h2o3 model, even classification model may still set
   // this to be true.
-  private Boolean supportPredictionInterval;
+  private final Boolean supportPredictionInterval;
 
   public MojoFrameToScoreResponseConverter(boolean supportPredictionInterval) {
     this.supportPredictionInterval = supportPredictionInterval;
@@ -57,8 +57,8 @@ public class MojoFrameToScoreResponseConverter
   @Override
   public ScoreResponse apply(MojoFrame mojoFrame, ScoreRequest scoreRequest) {
     Set<String> includedFields = getSetOfIncludedFields(scoreRequest);
-    List<List<String>> outputRows =
-        Stream.generate(ArrayList<String>::new)
+    List<Row> outputRows =
+        Stream.generate(Row::new)
             .limit(mojoFrame.getNrows())
             .collect(Collectors.toList());
     copyFilteredInputFields(scoreRequest, includedFields, outputRows);
@@ -81,7 +81,7 @@ public class MojoFrameToScoreResponseConverter
    * response frame, only one column rows will be populated into the outputRows to ensure backward
    * compatible.
    */
-  private void fillOutputRows(MojoFrame mojoFrame, List<List<String>> outputRows) {
+  private void fillOutputRows(MojoFrame mojoFrame, List<Row> outputRows) {
     List<List<String>> targetRows = getTargetRows(mojoFrame);
     for (int rowIdx = 0; rowIdx < mojoFrame.getNrows(); rowIdx++) {
       outputRows.get(rowIdx).addAll(targetRows.get(rowIdx));
@@ -182,9 +182,9 @@ public class MojoFrameToScoreResponseConverter
    * Extract prediction interval columns rows from MOJO response frame. Note: Assumption is
    * prediction interval should already be enabled and response frame has expected structure.
    */
-  private List<List<String>> getPredictionIntervalRows(MojoFrame mojoFrame, int targetIdx) {
-    List<List<String>> predictionIntervalRows =
-        Stream.generate(ArrayList<String>::new)
+  private List<Row> getPredictionIntervalRows(MojoFrame mojoFrame, int targetIdx) {
+    List<Row> predictionIntervalRows =
+        Stream.generate(Row::new)
             .limit(mojoFrame.getNrows())
             .collect(Collectors.toList());
     for (int row = 0; row < mojoFrame.getNrows(); row++) {
@@ -234,15 +234,15 @@ public class MojoFrameToScoreResponseConverter
   }
 
   private static void copyFilteredInputFields(
-      ScoreRequest scoreRequest, Set<String> includedFields, List<List<String>> outputRows) {
+      ScoreRequest scoreRequest, Set<String> includedFields, List<Row> outputRows) {
     if (includedFields.isEmpty()) {
       return;
     }
     boolean generateRowIds = shouldGenerateRowIds(scoreRequest, includedFields);
-    List<List<String>> inputRows = scoreRequest.getRows();
+    List<Row> inputRows = scoreRequest.getRows();
     for (int row = 0; row < outputRows.size(); row++) {
-      List<String> inputRow = inputRows.get(row);
-      List<String> outputRow = outputRows.get(row);
+      Row inputRow = inputRows.get(row);
+      Row outputRow = outputRows.get(row);
       List<String> inputFields = scoreRequest.getFields();
       for (int col = 0; col < inputFields.size(); col++) {
         if (includedFields.contains(inputFields.get(col))) {

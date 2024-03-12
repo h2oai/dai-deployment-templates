@@ -1,5 +1,6 @@
 package ai.h2o.mojos.deploy.common.transform;
 
+import ai.h2o.mojos.deploy.common.rest.model.Row;
 import ai.h2o.mojos.deploy.common.rest.model.ScoreRequest;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
@@ -17,7 +18,7 @@ public class ScoreRequestToMojoFrameConverter
     List<String> fields = scoreRequest.getFields();
 
     if (scoreRequest.getRows() != null) {
-      for (List<String> row : scoreRequest.getRows()) {
+      for (Row row : scoreRequest.getRows()) {
         MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
         for (int i = 0; i < row.size(); i++) {
           rowBuilder.setValue(fields.get(i), row.get(i));

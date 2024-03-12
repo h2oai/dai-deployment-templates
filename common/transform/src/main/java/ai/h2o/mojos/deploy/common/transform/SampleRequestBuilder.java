@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
  * request to further play with and fill with actual meaningful data.
  */
 public class SampleRequestBuilder {
-  /** Builds a valid {@link ScoreRequest} based on the given mojo input {@link MojoFrameMeta}. */
+  /**
+   * Builds a valid {@link ScoreRequest} based on the given mojo input {@link MojoFrameMeta}.
+   */
   public ScoreRequest build(MojoFrameMeta inputMeta) {
     ScoreRequest request = new ScoreRequest();
     final List<String> fields =
