@@ -1,0 +1,3 @@
+azure-storage-common==2.1.0
+azure
+azureml-sdk
