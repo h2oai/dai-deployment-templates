@@ -57,7 +57,9 @@ public class ModelsApiController implements ModelApi {
       ScoreRequest request = getRestScoreRequest(gcpRequest);
       ScoreResponse response = getGcpScoreResponse(scorer.score(request));
       // return ResponseEntity.ok(scorer.score(request));
-      return ResponseEntity.ok(response);
+      return ResponseEntity.ok().contentLength(
+              new ObjectMapper().writeValueAsString(response).length()
+      ).body(response);
     } catch (Exception e) {
       log.info("Failed scoring request: {}, due to: {}", gcpRequest, e.getMessage());
       log.debug(" - failure cause: ", e);
