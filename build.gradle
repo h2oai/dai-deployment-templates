@@ -22,6 +22,10 @@ buildscript {
 subprojects {
     repositories {
         mavenCentral()
+        maven {
+            // this allows build with staged dependencies, like mojo2
+            url "https://oss.sonatype.org/content/groups/staging/"
+        }
     }
 }
 

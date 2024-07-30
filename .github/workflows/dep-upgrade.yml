@@ -1,0 +1,67 @@
+name: "Create component upgrade PR"
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: "Name of the component that you want to upgrade"
+        required: true
+        type: string
+        default: "mojoRuntimeVersion"
+      new_version:
+        description: "New version of that component"
+        required: true
+        type: string
+      note:
+        description: "Anything worth mentioning in the pull-request description"
+        required: false
+        type: string
+        default: ""
+
+run-name: "Switching ${{ inputs.component }} to ${{ inputs.new_version }}"
+
+jobs:
+  upgrade:
+    if: |
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+      - name: create branch
+        run: |
+          grep -q '^${{ inputs.component }}' gradle.properties
+          git checkout -b upgrade/${{ inputs.component }}/${{ inputs.new_version }}
+          sed -i '/^${{ inputs.component }} =/s:^${{ inputs.component }}.*:${{ inputs.component }} = ${{ inputs.new_version }}:' gradle.properties
+          git diff
+          git config user.email "ops@h2o.ai"
+          git config user.name "H2O.ai"
+          git commit -am 'Switch ${{ inputs.component }} to ${{ inputs.new_version }}'
+          git push -u origin upgrade/${{ inputs.component }}/${{ inputs.new_version }}
+      - name: Target branch
+        run: |
+          TARGET_BRANCH="${{ github.ref }}"
+          TARGET_BRANCH=${TARGET_BRANCH/#\refs\/heads\//}
+          echo "TARGET_BRANCH=$TARGET_BRANCH" >> $GITHUB_ENV # update GitHub ENV vars
+      - name: Create PR
+        # https://github.com/marketplace/actions/github-action-for-creating-pull-requests
+        uses: devops-infra/action-pull-request@v0.5.5
+        id: create_release_pr
+        with:
+          github_token: ${{ github.token }}
+          source_branch: "upgrade/${{ inputs.component }}/${{ inputs.new_version }}"
+          target_branch: "${{ env.TARGET_BRANCH }}"
+          title: "Upgrade ${{ inputs.component }} to ${{ inputs.new_version }}"
+          assignee: ${{ github.actor }}
+          body: |
+            Automated upgrade to new component version.
+            -----
+            ${{ inputs.note }}
+          label: CI
+          draft: true
+          get_diff: false
+          ignore_users: "dependabot"
+          allow_no_diff: true
