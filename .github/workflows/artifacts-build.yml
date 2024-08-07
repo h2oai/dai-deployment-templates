@@ -1,0 +1,48 @@
+name: Build image and template artifact
+
+on:
+  workflow_call:
+    inputs:
+      component_version:
+        description: Gradle component version
+        type: string
+        default: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build templates
+        run: |
+          ./gradlew --init-script init.gradle distributionZip
+
+      - name: Save template artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: template
+          path: build/dai-deployment-templates-${{ inputs.component_version }}.zip
+          compression-level: 0
+
+      - name: Build images with Gradle Wrapper
+        run: |
+          ./gradlew --init-script init.gradle jibBuildTar -Djib.to.image=image:latest -Djib.outputPaths.tar=/tmp/image.tar
+
+      - name: Save image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image
+          path: /tmp/image.tar
+          compression-level: 0

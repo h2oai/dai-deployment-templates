@@ -1,0 +1,57 @@
+name: Extract Current Commit Hash, Release version and Gradle Component version
+
+on:
+  workflow_call:
+    outputs:
+      commit_hash:
+        description: "Commit hash"
+        value: ${{ jobs.setup_env.outputs.commit_hash }}
+      release_base_version:
+        description: "Release base version, such as 1.2"
+        value: ${{ jobs.setup_env.outputs.release_base_version }}
+      release_version:
+        description: "Release version, such as 1.2.3"
+        value: ${{ jobs.setup_env.outputs.release_version }}
+      component_version:
+        description: "Gradle component version, such as 1.2.3"
+        value: ${{ jobs.setup_env.outputs.component_version }}
+
+jobs:
+  setup_env:
+    name: Extract commit hash and release version
+    runs-on: ubuntu-latest
+    outputs:
+      commit_hash: ${{ steps.commit_hash.outputs.sha }}
+      release_base_version: ${{ steps.release_base_version.outputs.version }}
+      release_version: ${{ steps.release_version.outputs.version }}
+      component_version: ${{ steps.component_version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Save Github Commit Hash
+        id: commit_hash
+        run: |
+          if ${{ github.event_name == 'pull_request' }}; then echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT; fi
+          if ${{ github.event_name == 'push' }}; then echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT; fi
+
+      - name: Save Github Release Base Version
+        id: release_base_version
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          github_ref="${{ github.ref }}"
+          echo "version=${github_ref#refs/heads/release/}" >> $GITHUB_OUTPUT
+
+      - name: Save Github Release Version
+        id: release_version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          github_ref="${{ github.ref }}"
+          echo "version=${github_ref#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Extract Gradle Component Version
+        id: component_version
+        run: |
+          componentVersion=$(grep version gradle.properties | grep -v '#' | sed -e 's/.*=//' | sed 's/^ *//')
+          echo "version: ${componentVersion}"
+          echo "version=${componentVersion}" >> $GITHUB_OUTPUT

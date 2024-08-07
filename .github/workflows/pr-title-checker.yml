@@ -1,0 +1,13 @@
+name: Check PR Title
+
+on:
+  workflow_call:
+
+jobs:
+  pr_title_check:
+    name: PR Linters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

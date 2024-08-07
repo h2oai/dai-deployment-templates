@@ -1,0 +1,84 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, edited, labeled, unlabeled ]
+    branches:
+      - 'master'
+      - 'release/[0-9]+.[0-9]+'
+  push:
+    branches:
+      - 'master'
+      - 'release/[0-9]+.[0-9]+'
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+jobs:
+  label_check:
+    uses: ./.github/workflows/label-checker.yml
+    if: ${{ github.event_name == 'pull_request' }}
+
+  pr_tile_check:
+    uses: ./.github/workflows/pr-title-checker.yml
+    if: ${{ github.event_name == 'pull_request' }}
+
+  code_quality_check:
+    uses: ./.github/workflows/code-quality-check.yml
+    secrets: inherit
+
+  setup_env:
+    uses: ./.github/workflows/setup-environment.yml
+
+  build:
+    needs:
+      - code_quality_check
+      - setup_env
+    uses: ./.github/workflows/artifacts-build.yml
+    secrets: inherit
+    with:
+      component_version: ${{ needs.setup_env.outputs.component_version }}
+
+  publish_latest_from_dev_branch:
+    if: ${{ startsWith(github.ref, 'refs/heads/master') }}
+    uses: ./.github/workflows/artifacts-publish.yml
+    needs:
+      - build
+      - setup_env
+    secrets: inherit
+    with:
+      s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/main/${{ needs.setup_env.outputs.commit_hash }}
+      latest_s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/main/latest
+      gcr_push_enabled: true
+      ecr_push_enabled: false
+      gcr_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
+      image_tags: "${{ needs.setup_env.outputs.commit_hash }},latest"
+
+  publish_latest_from_release_branch:
+    if: startsWith(github.ref, 'refs/heads/release/')
+    uses: ./.github/workflows/artifacts-publish.yml
+    needs:
+      - build
+      - setup_env
+    secrets: inherit
+    with:
+      s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/release-${{ needs.setup_env.outputs.release_base_version }}/${{ needs.setup_env.outputs.commit_hash }}
+      latest_s3_location: s3://artifacts.h2o.ai/snapshots/mlops/rest-scorer/release-${{ needs.setup_env.outputs.release_base_version }}/latest
+      gcr_push_enabled: true
+      ecr_push_enabled: false
+      gcr_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
+      image_tags: "${{ needs.setup_env.outputs.commit_hash }},latest-${{ needs.setup_env.outputs.release_base_version }}"
+
+  publish_release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/artifacts-publish.yml
+    needs:
+      - build
+      - setup_env
+    secrets: inherit
+    with:
+      s3_location: s3://artifacts.h2o.ai/releases/mlops/rest-scorer/${{ needs.setup_env.outputs.release_version }}
+      latest_s3_location: s3://artifacts.h2o.ai/releases/mlops/rest-scorer/latest
+      gcr_push_enabled: true
+      ecr_push_enabled: true
+      gcr_image_name: us-docker.pkg.dev/vorvan/dev/h2oai-modelscoring-restscorer
+      ecr_image_name: 926522735405.dkr.ecr.us-east-1.amazonaws.com/h2oai-modelscoring-restscorer
+      image_tags: "v${{ needs.setup_env.outputs.release_version }}"

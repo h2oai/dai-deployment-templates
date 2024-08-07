@@ -1,0 +1,24 @@
+name: Label Checker
+
+on:
+  workflow_call:
+
+jobs:
+  required_labels_check:
+    name: Has Type Label
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://agilepathway/pull-request-label-checker:v1.4.26
+        with:
+          prefix_mode: true
+          one_of: "type/"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+  do_not_merge_label_check:
+    name: Allowed to Merge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://agilepathway/pull-request-label-checker:v1.4.26
+        with:
+          none_of: do not merge
+          repo_token: ${{ secrets.GITHUB_TOKEN }}

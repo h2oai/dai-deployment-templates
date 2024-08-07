@@ -1,0 +1,137 @@
+name: Publish image and template artifact
+
+on:
+  workflow_call:
+    secrets:
+      GCR_JSON_KEY:
+        required: true
+
+    inputs:
+      s3_location:
+        description: "S3 location to push template artifacts"
+        required: true
+        type: string
+      latest_s3_location:
+        description: "S3 location to push template artifacts as latest"
+        required: false
+        default: ''
+        type: string
+      gcr_push_enabled:
+        description: "Enable image push to GCR"
+        required: true
+        type: boolean
+      ecr_push_enabled:
+        description: "Enable image push to ECR"
+        required: true
+        type: boolean
+      gcr_image_name:
+        description: "Docker Registry and Repository for GCR"
+        required: false
+        type: string
+      ecr_image_name:
+        description: "Docker Registry and Repository for MC ECR"
+        required: false
+        type: string
+      image_tags:
+        description: "Comma-separated list of tags, such as 'ab12, cd45'"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish_to_s3:
+    name: Push to S3 bucket
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::524466471676:role/GitHub-OIDC-Role
+          role-session-name: h2oai-mlops-python-client
+          aws-region: us-east-1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: template
+          path: dai-deployment-templates.zip
+
+      - name: Publish wheel
+        run: |
+          aws s3 sync dai-deployment-templates.zip ${{ inputs.s3_location }}
+          if [ ${{ inputs.latest_s3_location }} != '' ]; then
+            aws s3 sync dai-deployment-templates.zip ${{ inputs.latest_s3_location }} --delete
+          fi
+
+  publish_image:
+    name: Push to Image Repositories
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Tags
+        id: prepare_tags
+        run: |
+          full_tags=()
+          # Split the comma-separated tags and iterate over each tag
+          for tag in $(echo "${{ inputs.image_tags }}" | tr ',' ' '); do
+            if [[ "${{ inputs.gcr_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.gcr_image_name }}:${tag}"); fi
+            if [[ "${{ inputs.ecr_push_enabled }}" == "true" ]]; then full_tags+=("${{ inputs.ecr_image_name }}:${tag}"); fi
+          done
+
+          # Join the full tags array into a single string separated by commas
+          joined_tags=$(IFS=','; echo "${full_tags[*]}")
+
+          echo "tags=${joined_tags}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GCR
+        if: ${{ inputs.gcr_push_enabled }}
+        uses: docker/login-action@v3
+        with:
+          registry: us-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+
+      - name: Configure MC AWS credentials
+        if: ${{ inputs.ecr_push_enabled }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::926522735405:role/h2o-github-oidc-ecr-role
+          role-session-name: h2oai-external-adapter-MC-ECR
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        if: ${{ inputs.ecr_push_enabled }}
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: image
+          path: /tmp
+
+      - name: Docker Load
+        run: |
+          docker load -i /tmp/image.tar
+
+      - name: Tag and push Docker image
+        run: |
+          for image_name_with_tag in $(echo "${{ steps.prepare_tags.outputs.tags }}" | tr ',' ' '); do
+            docker tag image:latest $image_name_with_tag
+            docker push $image_name_with_tag
+          done
